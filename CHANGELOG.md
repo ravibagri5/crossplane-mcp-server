@@ -10,6 +10,8 @@ a tool, or making an optional argument required, is a breaking change.
 
 ## [Unreleased]
 
+## [0.3.0-rc.1] - 2026-10-08
+
 ### Added
 
 - XRD versions are exposed as live MCP resources at stable
@@ -104,6 +106,7 @@ First release. Everything below is new.
 - Requires Go 1.26 or newer to build from source, which `k8s.io/client-go`
   v0.37 depends on. The released binaries and container image are unaffected.
 
-[Unreleased]: https://github.com/ravibagri5/crossplane-mcp-server/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/ravibagri5/crossplane-mcp-server/compare/v0.3.0-rc.1...HEAD
+[0.3.0-rc.1]: https://github.com/ravibagri5/crossplane-mcp-server/compare/v0.2.0...v0.3.0-rc.1
 [0.2.0]: https://github.com/ravibagri5/crossplane-mcp-server/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/ravibagri5/crossplane-mcp-server/releases/tag/v0.1.0
