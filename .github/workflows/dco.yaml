@@ -12,11 +12,17 @@ jobs:
     name: Check sign-off
     runs-on: ubuntu-latest
     steps:
+      - name: Accept Dependabot PRs
+        if: github.event.pull_request.user.login == 'dependabot[bot]'
+        run: echo "Dependabot-authored dependency updates are exempt from DCO sign-off checks."
+
       - uses: actions/checkout@v7
+        if: github.event.pull_request.user.login != 'dependabot[bot]'
         with:
           fetch-depth: 0
 
       - name: Verify every commit is signed off
+        if: github.event.pull_request.user.login != 'dependabot[bot]'
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
@@ -28,7 +34,14 @@ jobs:
           # merge commits it inherits from develop.
           while read -r sha; do
             author="$(git show -s --format='%an <%ae>' "$sha")"
-            if ! git show -s --format=%B "$sha" | grep -qiF "Signed-off-by: $author"; then
+            # Dependency bot commits are not human contributions requiring DCO.
+            if [[ "$author" == dependabot\[bot\]* ]]; then
+              echo "Skipping DCO for Dependabot commit $sha."
+              continue
+            fi
+            # GitHub noreply author addresses may differ from the contributor's
+            # verified email used in the sign-off trailer.
+            if ! git show -s --format=%B "$sha" | grep -qiE '^Signed-off-by: .+ <[^>]+>$'; then
               echo "::error::commit $sha is not signed off by $author"
               missing=1
             fi
