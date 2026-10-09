@@ -10,6 +10,14 @@ a tool, or making an optional argument required, is a breaking change.
 
 ## [Unreleased]
 
+### Changed
+
+- Development and releases now happen on `main` only. The `develop`,
+  `release/*` and `hotfix/*` branches and the base-branch guard are retired;
+  pull requests target `main`, and a release is a signed tag on `main`.
+- Releases publish automatically, with the version's CHANGELOG section as the
+  release notes, instead of as drafts with notes generated from commits.
+
 ## [0.3.0] - 2026-10-08
 
 ### Added

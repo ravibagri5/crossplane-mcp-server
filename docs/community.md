@@ -65,9 +65,8 @@ access apply them.
 
 **General**
 
-- Default branch: `develop`.
-- Merge button: squash only for `develop`; merge commits allowed on `main` so
-  release merges keep their history.
+- Default branch: `main`.
+- Merge button: squash only.
 - Automatically delete head branches after merge: on.
 - Discussions: on, with the categories above.
 - Issues: on, with blank issues disabled.
@@ -75,8 +74,8 @@ access apply them.
 
 **Branch protection**
 
-See [docs/branching.md](branching.md#protection-rules) for the full rules on
-`main`, `develop` and `release/*`.
+See [docs/branching.md](branching.md#protection-rules) for the rules on
+`main`, the only protected branch.
 
 **Projects**
 

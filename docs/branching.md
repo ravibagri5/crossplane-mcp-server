@@ -1,67 +1,29 @@
-# Branching and release strategy
+# Branching and releases
 
-`main` is what people install. It is never a work in progress.
-
-Contributions land on `develop`, are stabilised on a `release/*` branch, are
-published as a release candidate, and only then reach `main`. That gives every
-change a pre-release soak against real control planes before anybody upgrades
-into it.
+Everything happens on `main`. Changes arrive through short-lived topic branches
+and squash-merged pull requests, and a release is a signed tag on a `main`
+commit. There are no `develop`, `release/*` or `hotfix/*` branches.
 
 ## Contents
 
-- [Branches](#branches)
 - [Where do I open my pull request?](#where-do-i-open-my-pull-request)
 - [Naming topic branches](#naming-topic-branches)
 - [The flow](#the-flow)
-- [Hotfixes](#hotfixes)
+- [Releasing](#releasing)
+- [Fixing a released version](#fixing-a-released-version)
 - [Tags and versions](#tags-and-versions)
 - [Protection rules](#protection-rules)
 - [Frequently asked questions](#frequently-asked-questions)
 
-## Branches
-
-| Branch | Purpose | Who merges here | Accepts pull requests from |
-| --- | --- | --- | --- |
-| `main` | Released code. Every commit is a tagged release or a release merge. | Maintainers only | `release/*`, `hotfix/*` |
-| `develop` | Default branch. Integration branch for all development. | Maintainers, on review | `feat/*`, `fix/*`, `docs/*`, `chore/*`, `refactor/*`, `test/*`, `perf/*`, `build/*`, `ci/*`, `deps/*` |
-| `release/vX.Y` | Stabilisation for one minor release. Cut from `develop`. Carries the `-rc.N` pre-release tags. | Maintainers | `fix/*`, `docs/*` only |
-| `hotfix/vX.Y.Z` | Urgent fix for a released version. Cut from `main`. | Maintainers | n/a |
-
-`develop` is the repository's default branch, so a fork's default and a new
-clone both point at the right place without anyone having to remember.
-
-```mermaid
-gitGraph
-  commit id: "v0.4.0"
-  branch develop
-  commit id: "feat: root cause"
-  commit id: "fix: xrd conditions"
-  branch release/v0.5
-  commit id: "chore: changelog"
-  commit id: "v0.5.0-rc.1" tag: "v0.5.0-rc.1"
-  commit id: "fix: rc feedback"
-  commit id: "v0.5.0-rc.2" tag: "v0.5.0-rc.2"
-  checkout main
-  merge release/v0.5 tag: "v0.5.0"
-  checkout develop
-  merge main
-  commit id: "feat: new cycle"
-```
-
 ## Where do I open my pull request?
 
-**Against `develop`.** Always, unless a maintainer has asked you otherwise.
+**Against `main`.** It is the default branch, so a fork and a fresh clone
+already point at it.
 
-Pull requests targeting `main` are failed automatically with a comment telling
-you how to retarget, because a change that has never been on `develop` has
-never been through a release candidate. You do not need to reopen anything:
-GitHub lets you change the base branch of an existing pull request from
-**Edit**, next to the title.
-
-The two exceptions, both maintainer-driven:
-
-- a `release/*` branch merging into `main` at the end of a release;
-- a `hotfix/*` branch merging into `main` for a critical fix.
+`main` must always be releasable: tests pass, and anything user-visible has an
+entry under `Unreleased` in [CHANGELOG.md](../CHANGELOG.md). Large features land
+behind a flag or in small, independently safe pull requests rather than on a
+long-lived branch.
 
 ## Naming topic branches
 
@@ -86,15 +48,13 @@ describe it, it is two branches.
 
 ## The flow
 
-### Contributors
-
 ```shell
 git clone https://github.com/<you>/crossplane-mcp-server.git
 cd crossplane-mcp-server
 git remote add upstream https://github.com/ravibagri5/crossplane-mcp-server.git
 
 git fetch upstream
-git switch -c feat/provider-config-credentials upstream/develop
+git switch -c feat/provider-config-credentials upstream/main
 
 # work, then
 make check
@@ -102,17 +62,17 @@ git commit --signoff
 git push origin feat/provider-config-credentials
 ```
 
-Open the pull request against `develop`. Keep your branch current by rebasing
-on `upstream/develop`, not by merging it in:
+Open the pull request against `main`. Keep your branch current by rebasing on
+`upstream/main`, not by merging it in:
 
 ```shell
 git fetch upstream
-git rebase upstream/develop
+git rebase upstream/main
 git push --force-with-lease
 ```
 
 Pull requests are squash-merged, so the pull request title becomes the commit
-message on `develop`. Write it as a
+message on `main`. Write it as a
 [Conventional Commit](https://www.conventionalcommits.org/):
 
 ```text
@@ -126,43 +86,47 @@ A `!` or a `BREAKING CHANGE:` footer marks a change to a tool contract. Those
 force a minor bump before 1.0 and a major bump after it, and they must be
 described in the pull request's breaking-changes section.
 
-### Maintainers, cutting a release
+## Releasing
 
-1. Open a release checklist issue from the template.
-2. Cut the branch: `git switch -c release/v0.5 develop && git push -u origin release/v0.5`.
-3. Move the CHANGELOG `Unreleased` section under the new version heading, on the
-   release branch.
-4. Tag a candidate: `git tag -s v0.5.0-rc.1 -m "v0.5.0-rc.1" && git push origin v0.5.0-rc.1`.
-   GoReleaser marks any tag with a pre-release suffix as a GitHub pre-release,
-   so it never becomes "latest".
-5. Soak it. Fixes go to `release/v0.5` as ordinary pull requests, then get
-   cherry-picked or merged back to `develop`. No new features on a release
-   branch.
-6. Re-tag `-rc.N` as needed until it is quiet.
-7. Merge `release/v0.5` into `main` with a merge commit, not a squash, so the
-   release history is preserved.
-8. Tag the release from `main`: `git tag -s v0.5.0 -m "v0.5.0" && git push origin v0.5.0`.
-9. Merge `main` back into `develop` so the release branch's fixes and the
-   CHANGELOG move forward.
-10. Close the milestone; move anything unfinished to the next one.
+Maintainers only. Open a release checklist issue from the template to track it.
 
-## Hotfixes
+1. **Prepare.** In a pull request to `main`, rename the CHANGELOG
+   `## [Unreleased]` heading to `## [X.Y.Z] - YYYY-MM-DD`, add a new empty
+   `## [Unreleased]` above it, and update `server.json`, `manifest.json` and
+   `smithery.yaml` if they carry the version. Merge it.
+2. **Optionally tag a candidate** on the updated `main` to try the published
+   binaries and image against real control planes before the final release:
 
-For a critical bug or a security fix in a released version, do not wait for the
-next `develop` cycle:
+   ```shell
+   git switch main && git pull --ff-only
+   git tag -s vX.Y.Z-rc.1 -m "vX.Y.Z-rc.1"
+   git push origin vX.Y.Z-rc.1
+   ```
 
-```shell
-git switch -c hotfix/v0.5.1 v0.5.0
-# fix, with a test
-git push -u origin hotfix/v0.5.1
-```
+   Fixes go to `main` as ordinary pull requests; tag `-rc.2` and so on as needed.
+3. **Tag the release** on `main`:
 
-Open the pull request against `main`, tag `v0.5.1` from `main` once merged, and
-then merge `main` into `develop` immediately. A hotfix that is not
-forward-ported comes back as a regression in the next release.
+   ```shell
+   git switch main && git pull --ff-only
+   git tag -s vX.Y.Z -m "vX.Y.Z"
+   git push origin vX.Y.Z
+   ```
+
+The release workflow refuses a tag that is not on `main`, and a final tag
+without a `## [X.Y.Z]` CHANGELOG section. It then publishes the GitHub release
+with that section as its notes, signed archives, checksums, SBOMs, MCP bundles
+and multi-arch images at `ghcr.io/ravibagri5/crossplane-mcp-server`. A release
+candidate uses its own CHANGELOG section if one exists, otherwise `Unreleased`.
+There is nothing to merge back afterwards.
+
+## Fixing a released version
+
+Fix forward. Merge the fix to `main` with a CHANGELOG entry, then release a
+patch version from `main` as above. Only the latest release is supported, so
+there are no maintenance branches or backports.
 
 Security fixes follow [SECURITY.md](../SECURITY.md) and are prepared privately
-before the branch is pushed.
+before anything is pushed.
 
 ## Tags and versions
 
@@ -175,15 +139,14 @@ tool contract is not yet frozen, so:
 | Adding a tool, or an optional argument | patch or minor | minor |
 | Bug fix, docs, internals | patch | patch |
 
-Tag format:
+Tag format, always on `main`:
 
-- `vX.Y.Z` — a release, tagged on `main`.
-- `vX.Y.Z-rc.N` — a release candidate, tagged on `release/vX.Y`.
-- `vX.Y.Z-beta.N` — an early preview of something large, such as the first
-  write tier. Also tagged on a release branch.
+- `vX.Y.Z` — a release.
+- `vX.Y.Z-rc.N` — an optional release candidate.
 
-Tags are signed (`git tag -s`). Pre-release tags never update the `latest`
-container image tag.
+Tags are signed (`git tag -s`). Pre-release tags are published as GitHub
+pre-releases, update the `rc` image tag, and never update `latest`. Never move
+or delete a tag that has been pushed; tag a new version instead.
 
 ## Protection rules
 
@@ -192,27 +155,12 @@ Configured on the repository; listed here so contributors know what to expect.
 **`main`**
 
 - Pull request required; direct pushes blocked.
-- Base branch restricted to `release/*` and `hotfix/*` by the branch guard
-  workflow, which runs as the `Check base branch` status check.
-- One approval required, plus CODEOWNERS review. Stale approvals are dismissed
-  when new commits land.
-- Required checks: `Check sign-off` (DCO) and `Check base branch`.
-- Branches must be up to date before merging.
-- Linear history and conversation resolution required; force pushes and
-  deletion blocked.
-
-**`develop`**
-
-- Pull request required; direct pushes blocked.
 - One approval required, plus CODEOWNERS review. Stale approvals are dismissed
   when new commits land.
 - Required check: `Check sign-off` (DCO).
 - Branches must be up to date before merging.
-- Conversation resolution required; force pushes and deletion blocked.
-
-**`release/*`**
-
-- Same as `develop`, plus: no new features, only fixes and release preparation.
+- Squash merge only; linear history and conversation resolution required;
+  force pushes and deletion blocked.
 
 ### Why CI is not a required check
 
@@ -222,10 +170,9 @@ reports a status, and a required check that never reports blocks the merge
 button forever. Requiring CI would therefore make every docs pull request
 unmergeable.
 
-The DCO and branch guard workflows have no path filter, so they always report
-and are safe to require. The DCO job explicitly succeeds for pull requests
-opened by `dependabot[bot]`; human-authored pull requests still need signed-off
-commits.
+The DCO workflow has no path filter, so it always reports and is safe to
+require. It explicitly succeeds for pull requests opened by `dependabot[bot]`;
+human-authored pull requests still need signed-off commits.
 
 CI still runs and is still visible on every pull request that touches code, and
 a red build is a blocker in review even though the button does not enforce it.
@@ -239,31 +186,23 @@ deliberate concession to the project having one maintainer: GitHub does not let
 anyone approve their own pull request, so a strict reading of "one approval"
 would make the repository unmergeable.
 
-Raise `required_approving_review_count` enforcement, and turn `enforce_admins`
-on, once there is a second maintainer. Until then, treat the bypass as
-something to be embarrassed about using, not a routine step.
+Turn `enforce_admins` on once there is a second maintainer. Until then, treat
+the bypass as something to be embarrassed about using, not a routine step.
 
 ## Frequently asked questions
 
-**I opened my pull request against `main` by mistake.**
-Edit the pull request, change the base branch to `develop`, and rebase if
-GitHub shows conflicts. Nothing is lost.
-
-**My change is a one-line typo. Does it still go through `develop`?**
-Yes. There is no separate path for small changes; `develop` merges to `main`
-often enough that it costs you nothing.
+**My change is a one-line typo. Do I still need a pull request?**
+Yes. Every change reaches `main` through a reviewed, signed-off pull request.
 
 **Can I base my branch on another contributor's branch?**
-Yes, but say so in the description and retarget to `develop` once theirs
-merges.
+Yes, but say so in the description and rebase onto `main` once theirs merges.
 
-**Why `develop` and not `next` or `pre-release`?**
-`develop` is the Git Flow name and the one most contributors recognise on
-sight. `next` is used by the Git project and the npm ecosystem, but is less
-widely understood. "Pre-release" describes a *tag* state, not a branch, so
-using it as a branch name would confuse it with the `-rc.N` tags.
+**How do users avoid unreleased changes on `main`?**
+By installing a tagged release. `main` is releasable, but only tags are
+releases, and the `latest` image only ever points at a final release.
 
-**Why not trunk-based development on `main`?**
-Because the users of this project point an AI assistant at production control
-planes. A release candidate that somebody has run against a real cluster is
-worth more here than a shorter path to `main`.
+**Why not keep `develop` and release branches?**
+They gave every change a soak period, at the cost of merge-backs, retargeted
+pull requests and fixes that had to be ported between branches. With one
+maintainer, an optional release candidate tagged on `main` gives the same
+chance to test against real control planes with a fraction of the process.

@@ -107,26 +107,9 @@ docker_manifests:
 # write access to it, and use homebrew_casks. The older brews section is
 # deprecated: https://goreleaser.com/deprecations#brews
 
-changelog:
-  use: github
-  sort: asc
-  groups:
-    - title: Added
-      regexp: '^.*?(feat|add)(\([[:word:]]+\))??!?:.+$'
-      order: 0
-    - title: Fixed
-      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
-      order: 1
-    - title: Other
-      order: 999
-  filters:
-    exclude:
-      - '^docs:'
-      - '^test:'
-      - '^chore:'
-
+# Release notes come from the tag's CHANGELOG.md section; see release.yaml.
 release:
-  draft: true
+  draft: false
   prerelease: auto
   extra_files:
     - glob: ./bundles/*.mcpb

@@ -59,23 +59,21 @@ triage work is described in [docs/community.md](docs/community.md).
 
 ## Branching
 
-**Open your pull request against `develop`, not `main`.**
+**Open your pull request against `main`.**
 
-`main` holds released code and only ever receives `release/*` and `hotfix/*`
-branches, so that nothing reaches a user without having been through a release
-candidate. A pull request that targets `main` is failed by the branch guard
-with instructions for retargeting it; you do not need to open a new one.
+`main` is the only long-lived branch and must always be releasable. Work on a
+short-lived topic branch and keep it rebased on `main`:
 
 ```shell
 git fetch upstream
-git switch -c feat/provider-config-credentials upstream/develop
+git switch -c feat/provider-config-credentials upstream/main
 ```
 
 Name your branch `<type>/<short-description>`, where the type matches the one
 you will use in the pull request title. See [Commit messages and
 sign-off](#commit-messages-and-sign-off) for the types.
 
-The full model, including how releases are cut and how hotfixes work, is in
+The full model, including how releases are tagged, is in
 [docs/branching.md](docs/branching.md).
 
 ## Development setup
@@ -293,12 +291,14 @@ git commit --signoff
 
 ## Pull requests
 
-- Target `develop`. See [Branching](#branching).
+- Target `main`. See [Branching](#branching).
 - One logical change per pull request.
 - Give it a Conventional Commit title; it becomes the squashed commit message.
 - Add or update tests for behaviour you change.
 - Update the README tool table if you add or rename a tool.
-- Rebase on `upstream/develop` rather than merging it in, and push with
+- Add an entry under *Unreleased* in [CHANGELOG.md](CHANGELOG.md) for anything a
+  user would notice; it becomes the release notes.
+- Rebase on `upstream/main` rather than merging it in, and push with
   `--force-with-lease`.
 - CI must be green. It runs build, vet, lint and tests on Linux, macOS and
   Windows.
@@ -309,18 +309,20 @@ that we are ignoring it.
 
 ## Releases
 
-Releases are cut from a `release/vX.Y` branch, published first as a release
-candidate (`vX.Y.0-rc.1`), soaked, then merged into `main` and tagged:
+Maintainers release by tagging `main`, after a pull request has moved the
+CHANGELOG `Unreleased` section under `## [X.Y.Z] - YYYY-MM-DD`:
 
 ```shell
-git switch -c release/v0.5 develop
-git tag -s v0.5.0-rc.1 -m "v0.5.0-rc.1"
-git push origin release/v0.5 v0.5.0-rc.1
+git switch main && git pull --ff-only
+git tag -s v0.5.0 -m "v0.5.0"
+git push origin v0.5.0
 ```
 
-GoReleaser builds the binaries, publishes the container image to GHCR and
-drafts the release notes from the commit log. Pre-release tags are published as
-GitHub pre-releases and never become `latest`.
+The release workflow checks the tag is on `main`, then GoReleaser builds the
+binaries, MCP bundles and container images and publishes the GitHub release
+with that CHANGELOG section as its notes. An optional `vX.Y.Z-rc.N` tag on
+`main` publishes a pre-release that never becomes `latest`.
 
-The full procedure, including hotfixes and the versioning rules, is in
-[docs/branching.md](docs/branching.md).
+Fixes for a released version also go to `main` and ship as a patch release.
+The full procedure and the versioning rules are in
+[docs/branching.md](docs/branching.md#releasing).
