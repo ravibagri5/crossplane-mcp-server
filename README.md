@@ -568,9 +568,8 @@ requirement. Good first issues are labelled
 
 Two things to know before you open a pull request:
 
-- Pull requests target `develop`, never `main`. `main` only receives `release/*`
-  and `hotfix/*` branches, so that every change ships through a release
-  candidate first. See [docs/branching.md](docs/branching.md).
+- Pull requests target `main`, the only long-lived branch. Releases are signed
+  tags on `main`. See [docs/branching.md](docs/branching.md).
 - Questions and half-formed ideas belong in
   [Discussions](https://github.com/ravibagri5/crossplane-mcp-server/discussions),
   not the issue tracker. A maintainer will open the issue once the shape is

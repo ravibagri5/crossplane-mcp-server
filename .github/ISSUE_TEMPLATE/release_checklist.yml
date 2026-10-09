@@ -1,14 +1,13 @@
 name: Release checklist
-description: Maintainers only — track a release through the branch flow
+description: Maintainers only — track a release from main
 title: "Release vX.Y.Z"
 labels: ["release"]
 body:
   - type: markdown
     attributes:
       value: |
-        Maintainers only. See
-        [docs/branching.md](https://github.com/ravibagri5/crossplane-mcp-server/blob/main/docs/branching.md)
-        for the branch and tag flow.
+        Maintainers only. Releases are tags on `main`; see
+        [docs/branching.md](https://github.com/ravibagri5/crossplane-mcp-server/blob/main/docs/branching.md#releasing).
 
   - type: input
     id: version
@@ -18,53 +17,30 @@ body:
     validations:
       required: true
 
-  - type: input
-    id: release-branch
-    attributes:
-      label: Release branch
-      placeholder: release/v0.5
-    validations:
-      required: true
-
   - type: checkboxes
-    id: stabilise
+    id: prepare
     attributes:
-      label: Stabilise
+      label: Prepare
       options:
-        - label: Release branch cut from `develop`
         - label: Milestone has no open blockers
-        - label: CHANGELOG Unreleased section moved under the version heading
+        - label: CHANGELOG `Unreleased` section moved under the version heading, merged to `main`
         - label: README tool table matches the registered tools
         - label: Compatibility matrix checked against current Crossplane and Kubernetes
+        - label: Registry metadata (`server.json`, `manifest.json`, smithery) updated
 
   - type: checkboxes
-    id: prerelease
+    id: candidate
     attributes:
-      label: Pre-release
+      label: Optional release candidate
       options:
-        - label: Release candidate tagged from the release branch (`vX.Y.0-rc.1`)
-        - label: Binaries and container image verified from the candidate
-        - label: Smoke-tested against a Crossplane v1 control plane
-        - label: Smoke-tested against a Crossplane v2 control plane
-        - label: Smoke-tested in at least two MCP clients
-        - label: Soak period elapsed with no new blockers
+        - label: "`vX.Y.Z-rc.N` tagged on `main` and smoke-tested against Crossplane v1 and v2 control planes in at least two MCP clients"
 
   - type: checkboxes
     id: release
     attributes:
       label: Release
       options:
-        - label: Release branch merged into `main`
-        - label: Final tag pushed from `main` and GoReleaser succeeded
-        - label: Release notes reviewed, breaking changes called out first
-        - label: Container image and checksums published and signed
-        - label: Registry metadata (`server.json`, `manifest.json`, smithery) updated
-
-  - type: checkboxes
-    id: after
-    attributes:
-      label: After
-      options:
-        - label: "`main` merged back into `develop`"
+        - label: Signed `vX.Y.Z` tag pushed from `main` and the release workflow succeeded
+        - label: Container image, checksums and signatures published
         - label: Milestone closed, unfinished items moved to the next milestone
         - label: Release announced in Discussions

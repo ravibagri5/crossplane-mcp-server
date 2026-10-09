@@ -2,11 +2,11 @@ name: Labels
 
 # .github/labels.yml is the source of truth for repository labels. Changes are
 # reviewed in a pull request, dry-run against the repository, and applied when
-# they land on develop. Labels are repository-wide, so they do not wait for a
+# they land on main. Labels are repository-wide, so they do not wait for a
 # release.
 on:
   push:
-    branches: [develop]
+    branches: [main]
     paths:
       - ".github/labels.yml"
       - ".github/workflows/labels.yaml"

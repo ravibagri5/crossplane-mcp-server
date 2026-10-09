@@ -29,9 +29,7 @@ jobs:
         run: |
           missing=0
           # --no-merges: a merge commit introduces no authored change, and the
-          # ones GitHub writes when a pull request is merged carry no trailer,
-          # so without this every release/* -> main pull request fails on the
-          # merge commits it inherits from develop.
+          # ones GitHub writes when a pull request is merged carry no trailer.
           while read -r sha; do
             author="$(git show -s --format='%an <%ae>' "$sha")"
             # Dependency bot commits are not human contributions requiring DCO.

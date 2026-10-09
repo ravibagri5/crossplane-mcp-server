@@ -1,7 +1,7 @@
 # Label catalogue.
 #
 # This file is the source of truth. Edit it in a pull request; the labels
-# workflow applies it to the repository when it merges to develop. Labels
+# workflow applies it to the repository when it merges to main. Labels
 # created by hand in the UI will be removed.
 #
 # Colours are quoted because YAML reads unquoted hex as a number: 5319e7 is

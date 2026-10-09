@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, develop, "release/**"]
+    branches: [main]
     # Prose cannot break the build, and the badge still reflects the last
     # commit that touched code.
     paths-ignore: &docs
@@ -62,7 +62,8 @@ jobs:
 
       - uses: actions/setup-go@v7
         with:
-          go-version: ${{ env.GO_VERSION }}
+          # golangci-lint v2.13.2 cannot read Go 1.27 export data.
+          go-version: "1.26"
           cache: true
 
       - uses: golangci/golangci-lint-action@v9
