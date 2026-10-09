@@ -12,6 +12,12 @@ a tool, or making an optional argument required, is a breaking change.
 
 ## [0.3.1] - 2026-10-09
 
+### Security
+
+- Upgrade `golang.org/x/net` to v0.60.0 for HTTP/2 vulnerabilities
+  GO-2026-6603, GO-2026-6610 and GO-2026-6611, reachable through the
+  Kubernetes client.
+
 ### Changed
 
 - Development and releases now happen on `main` only. The `develop`,
