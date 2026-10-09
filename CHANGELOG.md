@@ -10,6 +10,8 @@ a tool, or making an optional argument required, is a breaking change.
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-10-09
+
 ### Changed
 
 - Development and releases now happen on `main` only. The `develop`,
@@ -17,6 +19,9 @@ a tool, or making an optional argument required, is a breaking change.
   pull requests target `main`, and a release is a signed tag on `main`.
 - Releases publish automatically, with the version's CHANGELOG section as the
   release notes, instead of as drafts with notes generated from commits.
+- Registry metadata (`server.json`, `manifest.json`, `smithery.yaml`) points at
+  the current release; `smithery.yaml` referenced an image tag that does not
+  exist (`v0.2.0` instead of `0.2.0`).
 
 ## [0.3.0] - 2026-10-08
 
@@ -114,7 +119,8 @@ First release. Everything below is new.
 - Requires Go 1.26 or newer to build from source, which `k8s.io/client-go`
   v0.37 depends on. The released binaries and container image are unaffected.
 
-[Unreleased]: https://github.com/ravibagri5/crossplane-mcp-server/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/ravibagri5/crossplane-mcp-server/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/ravibagri5/crossplane-mcp-server/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/ravibagri5/crossplane-mcp-server/compare/v0.2.0...v0.3.0
 [0.3.0-rc.1]: https://github.com/ravibagri5/crossplane-mcp-server/compare/v0.2.0...v0.3.0-rc.1
 [0.2.0]: https://github.com/ravibagri5/crossplane-mcp-server/compare/v0.1.0...v0.2.0
