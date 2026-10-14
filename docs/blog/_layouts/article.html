@@ -1,0 +1,29 @@
+---
+layout: default
+---
+<article class="article-shell">
+  <header class="article-header">
+    <p class="eyebrow">Crossplane <span>/</span> MCP <span>/</span> Open source</p>
+    <h1>{{ page.title }}</h1>
+    <p class="article-deck">{{ page.description }}</p>
+    <div class="article-meta">
+      <span>Ravi Kumar</span>
+      <span aria-hidden="true">/</span>
+      <time datetime="{{ page.date | date: '%Y-%m-%d' }}">{{ page.date | date: "%b %-d, %Y" }}</time>
+      <span aria-hidden="true">/</span>
+      <span>8 min read</span>
+    </div>
+  </header>
+  <div class="article-content">
+    {{ content }}
+  </div>
+  <aside class="article-cta">
+    <p class="eyebrow">Try it yourself</p>
+    <h2>Which platform API would you open up first?</h2>
+    <p>Run the demo control plane, connect your MCP client, and tell us what you would build.</p>
+    <div class="cta-links">
+      <a class="button-link" href="https://github.com/ravibagri5/crossplane-mcp-server">Explore the project</a>
+      <a href="https://github.com/ravibagri5/crossplane-mcp-server/discussions">Join the discussion</a>
+    </div>
+  </aside>
+</article>
