@@ -1,0 +1,8 @@
+title: crossplane-mcp-server | Field Notes
+description: Making Crossplane platform APIs usable from any AI assistant.
+url: https://ravibagri5.github.io
+baseurl: /crossplane-mcp-server
+markdown: kramdown
+permalink: /:title/
+exclude:
+  - README.md
